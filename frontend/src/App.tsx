@@ -374,7 +374,7 @@ function App() {
       >
         <UploadCloud size={logs.length > 0 ? 32 : 48} color={dragActive ? 'var(--success)' : 'var(--primary)'} style={{ marginBottom: '0.5rem' }} />
         <h3 style={{ fontSize: logs.length > 0 ? '1rem' : '1.25rem' }}>
-          {logs.length > 0 ? 'Upload additional JSON logs (Drag & drop or click)' : 'Drag and drop your audit logs here'}
+          {logs.length > 0 ? 'Upload JSON logs (Drag & drop or click)' : 'Drag and drop your audit logs here'}
         </h3>
         <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontSize: '0.875rem' }}>
           Supports single records or arrays of up to 10,000 logs in `.json` files.
