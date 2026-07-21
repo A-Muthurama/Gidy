@@ -1,108 +1,161 @@
-# Guardian: System Audit Logs Dashboard
+# 🛡️ Guardian: Enterprise System Audit Logs Dashboard
 
-Guardian is a premium full-stack dashboard built for security engineers to upload, view, filter, sort, and investigate system audit logs.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express_4.19-green.svg)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas_8.4-47A248.svg)](https://www.mongodb.com/)
+[![Vercel](https://img.shields.io/badge/Deployment-Vercel-black.svg)](https://vercel.com)
 
----
-
-## Technical Decisions
-
-### Backend
-
-1. **Node.js, Express & TypeScript**: Selected for a robust, strongly-typed development experience and efficient async I/O handling.
-2. **MongoDB & Mongoose Schema**: 
-   - Audit logs naturally fit a semi-structured document store where records are static and read-heavy.
-   - Built-in schema validation ensures database integrity for severity levels (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) and resolution status (`Unresolved`, `Resolved`).
-3. **Indexing for Performance**:
-   - Single-field and compound indexes are configured on high-cardinality fields (`actor`, `role`, `action`, `resourceType`, `region`, `severity`, `status`, `timestamp`) to guarantee sub-millisecond server-side querying, sorting, and filtering.
-   - Text indexing allows broad search patterns across actor emails, IP addresses, and resource paths.
-4. **Bulk Ingestion optimization**:
-   - The `/api/logs/bulk` API leverages Mongoose's `insertMany` option with `{ ordered: false }` to insert up to 10,000 logs in a single batch, minimizing database round-trips.
-
-### Frontend
-
-1. **React, TypeScript & Vite**: Selected for compile-time safety, extremely fast build speeds, and instant development hot reloading.
-2. **Proxy Configuration**:
-   - Out-of-the-box development proxy is set up in `vite.config.ts` to map `/api` calls directly to the Express server running on port `5000` to avoid CORS issues.
-3. **Vanilla CSS System**:
-   - Custom CSS variables (`--bg-primary`, `--primary`, `--critical`, etc.) build a cohesive cyber-security style theme.
-   - Responsive flexbox/grid layout ensures the dashboard scales beautifully on all screens.
-   - Micro-animations (like sliding sidebar drawer and smooth fade-in animations) enhance the visual experience.
+> **Guardian** is an enterprise-grade, full-stack cybersecurity audit log intelligence platform built to ingest, index, investigate, and analyze system activity logs at scale.
 
 ---
 
-## Project Structure
+## 🌟 Key Features
+
+- **⚡ High-Throughput Log Ingestion**: Supports single-record JSON uploads as well as high-capacity bulk datasets (up to 10,000 logs per batch).
+- **🔍 Sub-Millisecond Search & Indexing**: Real-time server-side text search across Actors, IP Addresses, Resources, and Regions using MongoDB compound indices.
+- **🎯 Multi-Dimensional Filtering**: Dynamic filtering by Severity (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), Resolution Status (`Unresolved`, `Resolved`), User Roles, and System Actions.
+- **🕵️ Incident Investigation Drawer**: Interactive side-panel providing full JSON payload deep-dives and live status toggling (Resolve / Re-open incidents).
+- **📊 Real-time Security Metrics**: Live dashboard analytics tracking total log counts, unresolved alerts, critical incident metrics, and resolution progress.
+- **🎨 Responsive Cyber-Security Theme**: Built with custom dark mode glassmorphism, micro-animations, accessible color tokens, and smooth drag-and-drop mechanics.
+
+---
+
+## 🏗️ Architecture & Technical Decisions
+
+```
+                           +------------------------+
+                           |  Vercel Edge Network   |
+                           |   (React + Vite UI)    |
+                           +-----------+------------+
+                                       |
+                              REST API | /api/logs
+                                       v
+                           +------------------------+
+                           | Vercel Serverless /    |
+                           |   Express Node API     |
+                           +-----------+------------+
+                                       |
+                              Mongoose | Index Queries
+                                       v
+                           +------------------------+
+                           |  MongoDB Atlas Cluster |
+                           |   (Document Storage)   |
+                           +------------------------+
+```
+
+### Backend (`Node.js`, `Express`, `TypeScript`, `MongoDB`)
+1. **Strong Typing & Scalability**: Clean TypeScript architecture ensuring strict API request/response contracts and reliable maintainability.
+2. **Database Optimization & Compound Indexing**:
+   - High-cardinality fields (`actor`, `role`, `action`, `resourceType`, `region`, `severity`, `status`, `timestamp`) are indexed for instant server-side pagination, sorting, and filtering.
+   - Text indexing enables instant search across IP addresses and email patterns.
+3. **High-Performance Bulk Ingestion**: Uses Mongoose `insertMany` with `{ ordered: false }` for maximum write throughput during large log batch uploads.
+
+### Frontend (`React`, `TypeScript`, `Vite`, `Vanilla CSS`)
+1. **Lightning-Fast UI**: Powered by Vite and React 18 for sub-second page loads and instantaneous state updates.
+2. **Zero-Dependency Styling System**: Native CSS custom variables (`--bg-primary`, `--primary`, `--critical`) ensuring total control over layout performance and sleek cyber-security aesthetics without heavyweight utility frameworks.
+3. **Resilient Drag-and-Drop Ingestion**: Persistent dropzone component supporting seamless dragging of single or bulk JSON files without blocking UI view state.
+
+---
+
+## 📁 Repository Structure
 
 ```
 Audit/
+├── vercel.json                 # Unified multi-service deployment configuration
+├── package.json                # Root package for workspace orchestration
+├── README.md                   # Project documentation
 ├── backend/
 │   ├── src/
 │   │   ├── models/
-│   │   │   └── AuditLog.ts
+│   │   │   └── AuditLog.ts     # Mongoose Schema & Indices definition
 │   │   ├── routes/
-│   │   │   └── logs.ts
-│   │   └── index.ts
-│   ├── .env
-│   ├── generate_logs.js
-│   ├── tsconfig.json
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx
-│   │   ├── index.css
-│   │   └── main.tsx
-│   ├── index.html
-│   ├── tsconfig.json
-│   └── package.json
-├── package.json
-└── README.md
+│   │   │   └── logs.ts         # REST API Controllers & Query Engine
+│   │   └── index.ts            # Express App setup & database connection
+│   ├── generate_logs.js        # Script to synthesize mock log datasets (10,000 records)
+│   ├── package.json            # Backend dependencies & build scripts
+│   └── tsconfig.json           # Backend TypeScript configuration
+└── frontend/
+    ├── src/
+    │   ├── App.tsx             # Main Dashboard, Filters, Ingestion & Investigation Drawer
+    │   ├── index.css           # Global Design Tokens & Cyber Theme Styles
+    │   └── main.tsx            # Application Entrypoint
+    ├── index.html              # HTML Shell & Google Fonts integration
+    ├── vite.config.ts          # Vite configuration & Dev Proxy settings
+    ├── package.json            # Frontend dependencies & build scripts
+    └── tsconfig.json           # Frontend TypeScript configuration
 ```
 
 ---
 
-## Setup & Running Instructions
+## 🚀 API Endpoint Reference
+
+| Method | Endpoint | Description | Query / Body Parameters |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/logs` | Fetch paginated & filtered audit logs | `page`, `limit`, `search`, `severity`, `status`, `role`, `action`, `region`, `sortBy`, `sortOrder` |
+| `GET` | `/api/logs/stats` | Fetch aggregate metrics & unique filter values | N/A |
+| `POST` | `/api/logs/bulk` | Ingest single or bulk array of JSON logs | JSON payload (Array or Single Document) |
+| `PATCH` | `/api/logs/:id` | Update log incident status | `{ "status": "Resolved" \| "Unresolved" }` |
+| `GET` | `/health` | Service health check | N/A |
+
+---
+
+## 💻 Local Setup & Installation
 
 ### Prerequisites
-- **Node.js** (v18+ recommended)
-- **MongoDB** running locally on default port `27017` (or edit `backend/.env` with your custom connection string).
+- **Node.js** (v18.x or higher)
+- **npm** (v9.x or higher)
+- **MongoDB** (Local instance or MongoDB Atlas URI)
 
-### Installation
+### Quick Start
 
-1. Clone or download this project.
-2. Navigate to the root directory `Audit`.
-3. Install all dependencies for both frontend and backend:
+1. **Clone Repository**:
+   ```bash
+   git clone https://github.com/A-Muthurama/Gidy.git
+   cd Gidy
+   ```
+
+2. **Install Dependencies**:
    ```bash
    npm run install:all
    ```
 
-### Running the Application
+3. **Configure Environment Variables**:
+   Create a `.env` file in the `backend/` directory:
+   ```env
+   PORT=5000
+   MONGO_URI=mongodb://localhost:27017/audit_db
+   ```
 
-1. **Generate Test Data (10,000 Mock Logs)**:
-   Generate a test file containing 10,000 random audit logs:
+4. **Generate Sample Test Logs (10,000 Records)**:
    ```bash
    npm run generate-data
    ```
-   This will output a file `backend/sample_audit_logs.json` that you can upload directly in the frontend UI.
+   *Generates `backend/sample_audit_logs.json` for instant UI upload testing.*
 
-2. **Start Dev Servers**:
-   Run both frontend (Vite) and backend (Express) concurrently:
+5. **Run Development Server**:
    ```bash
    npm run dev
    ```
-   - **Frontend** will be live at: http://localhost:3000
-   - **Backend** will be live at: http://localhost:5000
+   - **Frontend UI**: [http://localhost:3000](http://localhost:3000)
+   - **Backend API**: [http://localhost:5000](http://localhost:5000)
 
 ---
 
-## Verification
+## ☁️ Deployment Guide (Vercel)
 
-### Uploading Logs
-- Open http://localhost:3000
-- If the database is empty, a large dropzone will ask you to upload a logs file.
-- Drag & drop or browse to select the generated `backend/sample_audit_logs.json`.
-- The dashboard will ingest all 10,000 logs and populate the interface instantly.
+This repository is pre-configured for **unified Vercel Multi-Service Deployment** via the root `vercel.json`.
 
-### Incident Investigation
-- Use the search bar to query actors, IP addresses, or resources.
-- Filter by Severity, Status, Role, Action, or Region.
-- Click any log row to open the **Log Investigation Panel** on the right side.
-- Inspect the full JSON payload, and toggle its status between `Resolved` and `Unresolved` directly from the UI.
+1. Import repository on [Vercel](https://vercel.com).
+2. Set **Root Directory** to `./`.
+3. Add Environment Variable:
+   - `MONGO_URI`: Your MongoDB Atlas Connection String.
+4. Deploy! Vercel will automatically build both the React frontend and Node backend services.
+
+---
+
+## 👨‍💻 Author
+
+**Muthurama A**  
+- GitHub: [@A-Muthurama](https://github.com/A-Muthurama)  
+- Email: `iammuthurama@gmail.com`
