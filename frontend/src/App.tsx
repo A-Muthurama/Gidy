@@ -201,9 +201,11 @@ function App() {
       const data = await response.json();
 
       if (response.ok) {
+        const recordText = data.count === 1 ? '1 log record' : `${data.count} log records`;
+        const fileText = files.length === 1 ? '1 file' : `${files.length} files`;
         setUploadMessage({ 
           type: 'success', 
-          text: `Bulk upload completed! ${data.count} records from ${files.length} files saved.` 
+          text: `Upload completed! Saved ${recordText} from ${fileText}.` 
         });
         // Refresh dashboard
         fetchStats();
@@ -315,7 +317,7 @@ function App() {
           </button>
           <button className="btn btn-primary" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud size={16} />
-            Bulk Upload
+            Upload JSON Logs
           </button>
           <input 
             type="file" 
@@ -360,23 +362,24 @@ function App() {
         </div>
       </section>
 
-      {/* Upload Zone (conditional or collapse if logs exist, but let's make it drag & drop) */}
-      {logs.length === 0 && (
-        <section 
-          className={`upload-zone animate-fade-in ${dragActive ? 'upload-zone-active' : ''}`}
-          onDragEnter={handleDrag}
-          onDragOver={handleDrag}
-          onDragLeave={handleDrag}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <UploadCloud size={48} color={dragActive ? 'var(--success)' : 'var(--primary)'} style={{ marginBottom: '1rem' }} />
-          <h3>Drag and drop your audit logs here</h3>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '0.875rem' }}>
-            Supports JSON files containing up to 10,000 logs in bulk. Or click to browse.
-          </p>
-        </section>
-      )}
+      {/* Upload Zone (Drag & drop available anytime) */}
+      <section 
+        className={`upload-zone animate-fade-in ${dragActive ? 'upload-zone-active' : ''}`}
+        onDragEnter={handleDrag}
+        onDragOver={handleDrag}
+        onDragLeave={handleDrag}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+        style={{ padding: logs.length > 0 ? '1.5rem' : '3rem', marginBottom: '1rem', cursor: 'pointer' }}
+      >
+        <UploadCloud size={logs.length > 0 ? 32 : 48} color={dragActive ? 'var(--success)' : 'var(--primary)'} style={{ marginBottom: '0.5rem' }} />
+        <h3 style={{ fontSize: logs.length > 0 ? '1rem' : '1.25rem' }}>
+          {logs.length > 0 ? 'Upload additional JSON logs (Drag & drop or click)' : 'Drag and drop your audit logs here'}
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontSize: '0.875rem' }}>
+          Supports single records or arrays of up to 10,000 logs in `.json` files.
+        </p>
+      </section>
 
       {uploadMessage && (
         <div className={`card animate-fade-in`} style={{ 
