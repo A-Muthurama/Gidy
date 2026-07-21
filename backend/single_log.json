@@ -1,0 +1,12 @@
+{
+  "actor": "priya.nair@company.com",
+  "role": "admin",
+  "action": "DELETE_USER",
+  "resource": "/api/users/334",
+  "resourceType": "USER",
+  "ipAddress": "192.168.1.45",
+  "region": "ap-south-1",
+  "severity": "HIGH",
+  "status": "Unresolved",
+  "timestamp": "2026-07-20T10:00:00Z"
+}
